@@ -15,7 +15,7 @@ __status__ = "Production"
 #==============================================================================
 
 def smart_binning(time, interval, verbose=0):
-    """Find datas binning intervals.
+    """Find data binning intervals.
 
     Iteratively finds ranges of time-sorted data, where the data falls into a
     defined time interval. This function provides an alternative to regular
@@ -115,3 +115,43 @@ def smart_binning(time, interval, verbose=0):
         print(f'  Max:    {np.max(n):8d}')
 
     return bin_ids
+
+#==============================================================================
+
+def split_data(time, gap):
+    """Split a time series at large gaps.
+
+    Parameters
+    -----
+    time : array-like
+        Sorted time marks.
+    gap : float
+        Gap length threshold. The data is split when the time interval between
+        data points exceeds this value.
+
+    Returns
+    -----
+    out : list
+        List of arrays containing indices to the split data sets.
+    """
+
+    time = np.asarray(time)
+
+    # check that time is sorted increasingly:
+    if np.any(np.diff(time) < 0):
+        raise ValueError("The provided time are not sorted increasingly.")
+
+    if len(time) < 2:
+        return []
+
+    # identify large gaps:
+    split = np.r_[0, np.nonzero(np.diff(data)>gap)[0] + 1, len(data)]
+    indices = []
+
+    # prepare list of indices to the split data sets:
+    for start, stop in zip(split[:-1], split[1:]):
+        indices.append(np.arange(start, stop))
+
+    return indices
+
+#==============================================================================
