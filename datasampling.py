@@ -22,7 +22,7 @@ def smart_binning(time, interval, verbose=0):
     binning of data with uneven time sampling.
 
     Parmeters
-    -----
+    ---------
     time : array-like
         Sorted time marks.
     interval : float
@@ -38,7 +38,7 @@ def smart_binning(time, interval, verbose=0):
         Raised if `time` is not sorted increasingly.
 
     Returns
-    -----
+    -------
     out : list
         A list of arrays containing indices to the data points which are in the
         same bin.
@@ -122,7 +122,7 @@ def split_data(time, gap):
     """Split a time series at large gaps.
 
     Parameters
-    -----
+    ----------
     time : array-like
         Sorted time marks.
     gap : float
@@ -130,7 +130,7 @@ def split_data(time, gap):
         data points exceeds this value.
 
     Returns
-    -----
+    -------
     out : list
         List of arrays containing indices to the split data sets.
     """
