@@ -14,7 +14,7 @@ __status__ = "Production"
 # FUNCTIONS
 #==============================================================================
 
-def smart_binning(time, interval, verbose=0):
+def smart_binning(time, interval, verbose=0, recursion=0):
     """Find data binning intervals.
 
     Iteratively finds ranges of time-sorted data, where the data falls into a
@@ -31,6 +31,9 @@ def smart_binning(time, interval, verbose=0):
     verbose : int, optional
         If zero, no information is printed. Otherwise, information about the
         identified intervals is printed. The default is 0.
+    recursion : int, optional
+        Defines the current recursion level. This argument is required for the
+        algorithm. Do not set a value different from 0. The default is 0.
 
     Raises
     ------
@@ -39,9 +42,11 @@ def smart_binning(time, interval, verbose=0):
 
     Returns
     -------
-    out : list
+    bin_ids : list
         A list of arrays containing indices to the data points which are in the
         same bin.
+    unbinned_ids : numpy.ndarray
+        IDs of data points that do not need to be binned.
     """
 
     time = np.asarray(time)
@@ -51,7 +56,7 @@ def smart_binning(time, interval, verbose=0):
         raise ValueError("The provided time are not sorted increasingly.")
 
     if len(time) < 2:
-        return []
+        return [], None
 
     # first, find all intervals:
     intervals = []
@@ -72,7 +77,7 @@ def smart_binning(time, interval, verbose=0):
                 intervals.append([j+1, i+1])
 
     if len(intervals) == 0:
-        return False
+        return False, False
 
     # second, find best interval:
     spreading = []
@@ -85,11 +90,11 @@ def smart_binning(time, interval, verbose=0):
 
     # third, recursion on preceeding time:
     time_pre = time[:bin_ids_cur[0]]
-    bin_ids_pre = smart_binning(time_pre, interval)
+    bin_ids_pre, __ = smart_binning(time_pre, interval, recursion=recursion+1)
 
     # fourth, recursion on succeeding time:
     time_suc = time[bin_ids_cur[-1]+1:]
-    bin_ids_suc = smart_binning(time_suc, interval)
+    bin_ids_suc, __ = smart_binning(time_suc, interval, recursion=recursion+1)
 
     # fifth, join indices lists:
     if bin_ids_pre:
@@ -104,6 +109,21 @@ def smart_binning(time, interval, verbose=0):
         for inter in bin_ids_suc:
             bin_ids.append(inter +add)
 
+    # determine data points that do not need binning:
+    if recursion == 0:
+        binned_ids = np.concatenate(bin_ids)
+        unbinned_ids = []
+
+        for i in np.arange(time.shape[0]):
+            if not i in binned_ids:
+                unbinned_ids.append(i)
+
+        unbinned_ids = np.array(unbinned_ids)
+        n_unbinned = unbinned_ids.shape[0]
+
+    else:
+        unbinned_ids = None
+
     # print information:
     if verbose:
         n = [len(ids) for ids in bin_ids]
@@ -113,8 +133,9 @@ def smart_binning(time, interval, verbose=0):
         print(f'  Median: {np.median(n):8.0f}')
         print(f'  Mean:   {np.mean(n):8.0f}')
         print(f'  Max:    {np.max(n):8d}')
+        print(f'{n_unbinned} data points do not require binning.')
 
-    return bin_ids
+    return bin_ids, unbinned_ids
 
 #==============================================================================
 
