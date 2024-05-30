@@ -56,7 +56,7 @@ def smart_binning(time, interval, verbose=0, recursion=0):
         raise ValueError("The provided time are not sorted increasingly.")
 
     if len(time) < 2:
-        return [], None
+        return [], False
 
     # first, find all intervals:
     intervals = []
@@ -77,7 +77,10 @@ def smart_binning(time, interval, verbose=0, recursion=0):
                 intervals.append([j+1, i+1])
 
     if len(intervals) == 0:
-        return False, False
+        if recursion == 0:
+            return [], np.arange(time.shape[0])
+        else:
+            return False, False
 
     # second, find best interval:
     spreading = []
