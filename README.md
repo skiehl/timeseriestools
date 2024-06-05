@@ -4,11 +4,11 @@ Python tools for time series analysis.
 ## Functions
 
 * Functions in `dataflagging.py`:
+    * `mask_largeunc()`: Identify data points with excessive uncertainties.
+    * `mask_outliers()`: Identify outliers.
+* Functions in `datasampling.py`:
     * `smart_binning():` Smart binning of unevenly sampled data.
     * `split_data():` Split time series data into segments at large time gags.
-* Functions in `datasampling.py`:
-    * `mask_outliers()`: Identify outliers.
-    * `mask_largeunc()`: Identify data points with excessive uncertainties.
 
 ## License
 
